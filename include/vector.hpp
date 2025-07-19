@@ -65,8 +65,8 @@ public:
    checkSize_(other);
 
     std::vector<T> vector_sum;
-    for (size_t i = 0; i < this->data_.size(); ++i){
-      const T v1 = this->data_[i];
+    for (size_t i = 0; i < data_.size(); ++i){
+      const T v1 = data_[i];
       const T v2 = other.data_[i];
       
       vector_sum.push_back(v1+v2);
@@ -78,8 +78,8 @@ public:
    checkSize_(other);
 
     std::vector<T> vector_subtract;
-    for (size_t i = 0; i < this->data_.size(); ++i){
-      const T v1 = this->data_[i];
+    for (size_t i = 0; i < data_.size(); ++i){
+      const T v1 = data_[i];
       const T v2 = other.data_[i];
       
       vector_subtract.push_back(v1-v2);
@@ -89,28 +89,42 @@ public:
 
   Vector operator*(const T other){
     std::vector<T> vector_mul_scalar;
-    for (size_t i = 0; i < this -> data_.size(); ++i){
-      const T v = this->data_[i];
-      vector_mul_scalar.push_back(v * other);
+    for (const auto &x : data_){
+      vector_mul_scalar.push_back(x * other);
     }
     return vector_mul_scalar;
   }
   
   Vector operator/(const T other){
     std::vector<T> vector_div_scalar;
-    for (size_t i = 0; i < this -> data_.size(); ++i){
-      const T v = this->data_[i];
-      vector_div_scalar.push_back(v / other);
+    for (const auto &x : data_){
+      vector_div_scalar.push_back(x / other);
     }
     return vector_div_scalar;
   }
   
+  T sum(){
+    T total;
+    for (const auto &x : data_){
+      total += x;
+    }
+    return total;
+  }
+
+  Vector avgElement(){
+    T total = sum();
+    std::vector<T> avg_vector;
+    for(const auto &x : data_){
+      avg_vector.push_back(x / total);
+    } 
+    return avg_vector;
+  }
   
 private:
   std::vector<T> data_;
 
   void checkSize_(const Vector<T> &other){
-    if (this->data_.size() != other.data_.size()){
+    if (data_.size() != other.data_.size()){
       std::cerr << "ERROR in function " << __func__ <<" : ";
       std::cerr << "Size vector isn't same!" << std::endl;
       exit(EXIT_FAILURE);
