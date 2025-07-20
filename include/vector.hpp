@@ -37,6 +37,12 @@ public:
   Vector() {}
 
   /**
+   * @brief Constructsa Vector obkect to handle initialization 'std::vector'.
+   * @example Vector<int> v = std::vector<int>{1,2,3};
+   */
+  Vector(const std::vector<T> &X) : vector_(X) {}
+
+  /**
    * @brief Constructs a Vector object to handle initialization with assignment (=).
    * @param X An 'std::initializer_list' used to initialize the internal data.
    * @example Vector<int> v = {1, 2, 3};
@@ -66,7 +72,7 @@ public:
     for (size_t i = 0; i < size_vector; ++i) {
       out << A.vector_[i];
       if (i != size_vector - 1) {
-        out << "  ";
+        out << "   ";
       }
     }
 
