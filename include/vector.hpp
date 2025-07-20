@@ -3,137 +3,192 @@
 #include <cstddef>
 #include <cstdlib>
 #include <iostream>
+#include <ostream>
 #include <utility>
 #include <vector>
-#include <ostream>
-
 
 /**
-* @brief 
-*
-* @Tparam
-*
-* @param
-*
-* @return
-*/
-template<typename T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &A){
-  size_t precision_before = out.precision();
-  out.precision(8);
-  
-  std::cout << "| ";
-  size_t size_vector = A.size();
-  for(size_t i = 0; i < size_vector; ++i){
-    out << A[i];
-    if (i != size_vector - 1){
-      out << "  ";
-    }
-  }
+ * @file vector.hpp
+ * @brief Defines a basic 1D mathematical vector class with common operations.
+ */
 
-  out << " |" << std::endl;
-  out.precision(precision_before);
-  
-  return out;
-}
+namespace kar {
+/**
+ * @namespace linalg
+ * @brief Namespace for linear algebra functionalities.
+ */
+namespace linalg {
 
-
-template<typename T>
-class Vector{
+/**
+ * @class Vector
+ * @brief A template class for 1-dimensional mathematical vector operations.
+ * @details This class acts as a wrapper around 'std::vector' to provide
+ * a convenient interface for element-wise arithmetic, scalar operations,
+ * and other common vector manipulations.
+ * @tparam T The numeric type of the vector's elements (e.g., 'int', 'float', 'double').
+ */
+template <typename T> class Vector {
 public:
-  Vector(const std::vector<T> &X) : data_(X) {}
- 
+  /**
+   * @brief Constructs a Vector object from a standard C++ vector.
+   * @param X An 'std::vector' used to initialize the internal data.
+   */
+  Vector(const std::vector<T> &X) : vector_(X) {}
 
-  friend std::ostream &operator<<(std::ostream &out, const Vector &A){
+  /**
+   * @brief Overloads the stream insertion operator '<<' for formatted output.
+   * @param out The output stream (e.g., 'std::cout').
+   * @param A The Vector object to print.
+   * @return A reference to the output stream.
+   */
+  friend std::ostream &operator<<(std::ostream &out, const Vector &A) {
     size_t precision_before = out.precision();
     out.precision(8);
-    
-    std::cout << "| ";
-    size_t size_vector = A.data_.size();
-    for(size_t i = 0; i < size_vector; ++i){
-      out << A.data_[i];
-      if (i != size_vector - 1){
+
+    out << "| ";
+    size_t size_vector = A.vector_.size();
+    for (size_t i = 0; i < size_vector; ++i) {
+      out << A.vector_[i];
+      if (i != size_vector - 1) {
         out << "  ";
       }
     }
 
     out << " |" << std::endl;
     out.precision(precision_before);
-    
+
     return out;
   }
 
-  Vector operator+(const Vector<T> &other){
-   checkSize_(other);
+  /**
+   * @brief Accesses an element at a specific index (read-only).
+   * @param i The zero-based index of the element.
+   * @return The value of the element at index 'i'.
+   */
+  T operator[](const size_t &i) const { return vector_[i]; }
+
+  /**
+   * @brief Performs element-wise vector addition.
+   * @param other The vector to add to this vector.
+   * @return A new 'Vector' object containing the sum.
+   * @note The program will terminate if the vectors have different sizes.
+   */
+  Vector operator+(const Vector<T> &other) const {
+    checkSize_(other);
 
     std::vector<T> vector_sum;
-    for (size_t i = 0; i < data_.size(); ++i){
-      const T v1 = data_[i];
-      const T v2 = other.data_[i];
-      
-      vector_sum.push_back(v1+v2);
+    vector_sum.reserve(vector_.size());
+    for (size_t i = 0; i < vector_.size(); ++i) {
+      vector_sum.push_back(vector_[i] + other.vector_[i]);
     }
-    return vector_sum;
+    return Vector(vector_sum);
   }
 
-  Vector operator-(const Vector<T> &other){
-   checkSize_(other);
+  /**
+   * @brief Performs element-wise vector subtraction.
+   * @param other The vector to subtract from this vector.
+   * @return A new 'Vector' object containing the difference.
+   * @note The program will terminate if the vectors have different sizes.
+   */
+  Vector operator-(const Vector<T> &other) const {
+    checkSize_(other);
 
     std::vector<T> vector_subtract;
-    for (size_t i = 0; i < data_.size(); ++i){
-      const T v1 = data_[i];
-      const T v2 = other.data_[i];
-      
-      vector_subtract.push_back(v1-v2);
+    vector_subtract.reserve(vector_.size());
+    for (size_t i = 0; i < vector_.size(); ++i) {
+      vector_subtract.push_back(vector_[i] - other.vector_[i]);
     }
-    return vector_subtract;
+    return Vector(vector_subtract);
   }
 
-  Vector operator*(const T other){
+  /**
+   * @brief Performs scalar multiplication.
+   * @param scalar The scalar value to multiply each element by.
+   * @return A new 'Vector' object containing the scaled elements.
+   */
+  Vector operator*(const T &scalar) const {
     std::vector<T> vector_mul_scalar;
-    for (const auto &x : data_){
-      vector_mul_scalar.push_back(x * other);
+    vector_mul_scalar.reserve(vector_.size());
+    for (const auto &x : vector_) {
+      vector_mul_scalar.push_back(x * scalar);
     }
-    return vector_mul_scalar;
+    return Vector(vector_mul_scalar);
   }
-  
-  Vector operator/(const T other){
+
+  /**
+   * @brief Performs scalar division.
+   * @param scalar The scalar value to divide each element by.
+   * @return A new 'Vector' object containing the result of the division.
+   */
+  Vector operator/(const T &scalar) const {
     std::vector<T> vector_div_scalar;
-    for (const auto &x : data_){
-      vector_div_scalar.push_back(x / other);
+    vector_div_scalar.reserve(vector_.size());
+    for (const auto &x : vector_) {
+      vector_div_scalar.push_back(x / scalar);
     }
-    return vector_div_scalar;
+    return Vector(vector_div_scalar);
   }
-  
-  T sum(){
-    T total;
-    for (const auto &x : data_){
+
+  /**
+   * @brief Calculates the sum of all elements in the vector.
+   * @return The total sum as a scalar value of type 'T'.
+   */
+  T sum() const {
+    T total{}; // Use brace initialization for zero-initialization
+    for (const auto &x : vector_) {
       total += x;
     }
     return total;
   }
 
-  Vector avgElement(){
+  /**
+   * @brief Creates a new vector by dividing each element by the total sum.
+   * @warning This method does not compute the average of elements. It performs
+   * a normalization where each new element 'v'_i = v_i / sum(v)'.
+   * @return A new 'Vector' where each element is its original value divided by
+   * the sum of all elements.
+   */
+  Vector proportionOfSum() const {
     T total = sum();
-    std::vector<T> avg_vector;
-    for(const auto &x : data_){
-      avg_vector.push_back(x / total);
-    } 
-    return avg_vector;
+    std::vector<T> prop_vector;
+    prop_vector.reserve(vector_.size());
+
+    // Handle division by zero case
+    if (total == T{}) {
+        return Vector(std::vector<T>(vector_.size(), T{}));
+    }
+    
+    for (const auto &x : vector_) {
+      prop_vector.push_back(x / total);
+    }
+    return Vector(prop_vector);
   }
 
-  std::pair<size_t, size_t> shape(){
-    return std::make_pair(1, data_.size());
+  /**
+   * @brief Returns the shape of the vector, represented as (1, N).
+   * @return A 'std::pair<size_t, size_t>' of the form (1, number_of_elements).
+   */
+  std::pair<size_t, size_t> shape() const {
+    return std::make_pair(1, vector_.size());
   }
-  
+
 private:
-  std::vector<T> data_;
+  /// @brief The underlying 'std::vector' that stores the elements.
+  std::vector<T> vector_;
 
-  void checkSize_(const Vector<T> &other){
-    if (data_.size() != other.data_.size()){
-      std::cerr << "ERROR in function " << __func__ <<" : ";
-      std::cerr << "Size vector isn't same!" << std::endl;
+  /**
+   * @brief Helper function to verify that two vectors have the same size.
+   * @param other The vector to compare the size against.
+   * @note Terminates the program with 'EXIT_FAILURE' if sizes are mismatched.
+   */
+  void checkSize_(const Vector<T> &other) const {
+    if (vector_.size() != other.vector_.size()) {
+      std::cerr << "FATAL ERROR: Vector sizes do not match for operation."
+                << " Left: " << vector_.size() << ", Right: " << other.vector_.size() << std::endl;
       std::exit(EXIT_FAILURE);
     }
   }
 };
+
+} // namespace linalg
+} // namespace kar
