@@ -6,6 +6,7 @@
 #include <ostream>
 #include <utility>
 #include <vector>
+#include <initializer_list>
 
 /**
  * @file vector.hpp
@@ -25,15 +26,24 @@ namespace linalg {
  * @details This class acts as a wrapper around 'std::vector' to provide
  * a convenient interface for element-wise arithmetic, scalar operations,
  * and other common vector manipulations.
- * @tparam T The numeric type of the vector's elements (e.g., 'int', 'float', 'double').
+ * @tparam T The numeric type of the vector's elements. recommends ('float', 'double').
  */
 template <typename T> class Vector {
 public:
   /**
-   * @brief Constructs a Vector object from a standard C++ vector.
-   * @param X An 'std::vector' used to initialize the internal data.
+   * @brief Constructs a Vector object to handle initialization.
+   * @param X An 'std::initializer_list' used to initialize the internal data.
+   * @example Vector<int> v = {1, 2, 3};
    */
-  Vector(const std::vector<T> &X) : vector_(X) {}
+  Vector(const std::initializer_list<T> &X) : vector_(X) {}
+
+  /**
+   * @brief Constructs a Vector object to handle initialization size.
+   * @detail each element 'vector_' will be defined as 0.
+   * @param size An 'size_t' used reserve a vector.
+   * @example Vector<int> v(5);
+   */
+  Vector(const size_t &size) : vector_(size, T{}) {}
 
   /**
    * @brief Overloads the stream insertion operator '<<' for formatted output.
@@ -65,7 +75,7 @@ public:
    * @param i The zero-based index of the element.
    * @return The value of the element at index 'i'.
    */
-  T operator[](const size_t &i) const { return vector_[i]; }
+  T &operator[](const size_t &i) const { return vector_[i]; }
 
   /**
    * @brief Performs element-wise vector addition.
