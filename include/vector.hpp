@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <ostream>
 
@@ -119,6 +121,10 @@ public:
     } 
     return avg_vector;
   }
+
+  std::pair<size_t, size_t> shape(){
+    return std::make_pair(1, data_.size());
+  }
   
 private:
   std::vector<T> data_;
@@ -127,7 +133,7 @@ private:
     if (data_.size() != other.data_.size()){
       std::cerr << "ERROR in function " << __func__ <<" : ";
       std::cerr << "Size vector isn't same!" << std::endl;
-      exit(EXIT_FAILURE);
+      std::exit(EXIT_FAILURE);
     }
   }
 };
