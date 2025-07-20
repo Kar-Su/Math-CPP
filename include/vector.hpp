@@ -30,8 +30,14 @@ namespace linalg {
  */
 template <typename T> class Vector {
 public:
+/**
+ * @brief Constructs a Vector object to handle initialization basic.
+ * @example Vector<int> v;
+ */
+  Vector() {}
+
   /**
-   * @brief Constructs a Vector object to handle initialization.
+   * @brief Constructs a Vector object to handle initialization with assignment (=).
    * @param X An 'std::initializer_list' used to initialize the internal data.
    * @example Vector<int> v = {1, 2, 3};
    */
@@ -71,11 +77,11 @@ public:
   }
 
   /**
-   * @brief Accesses an element at a specific index (read-only).
+   * @brief Accesses an element at a specific index.
    * @param i The zero-based index of the element.
    * @return The value of the element at index 'i'.
    */
-  T &operator[](const size_t &i) const { return vector_[i]; }
+  T &operator[](const size_t &i) { return vector_[i]; }
 
   /**
    * @brief Performs element-wise vector addition.
@@ -126,6 +132,24 @@ public:
   }
 
   /**
+   * @brief Performs hadamard product.
+   * @param other The vector to perfoms hadamard product from this vector.
+   * @return A new 'Vector' object containing the hadamard product result.
+   * @note The program will multiply v1_i * v2_i and store value to new 'Vector'.
+   */
+  Vector operator*(const Vector<T> &other) const {
+    checkSize_(other);
+
+    std::vector<T> hadamard_product_result;
+    hadamard_product_result.reserve(vector_.size());
+
+    for (size_t i = 0; i < vector_.size(); ++i) {
+      hadamard_product_result.push_back(vector_[i] * other.vector_[i]);
+    }
+    return Vector(hadamard_product_result);
+  }
+
+  /**
    * @brief Performs scalar division.
    * @param scalar The scalar value to divide each element by.
    * @return A new 'Vector' object containing the result of the division.
@@ -154,7 +178,7 @@ public:
   /**
    * @brief Creates a new vector by dividing each element by the total sum.
    * @warning This method does not compute the average of elements. It performs
-   * a normalization where each new element 'v'_i = v_i / sum(v)'.
+   * a normalization where each new element v_i = v_i / sum(v).
    * @return A new 'Vector' where each element is its original value divided by
    * the sum of all elements.
    */
@@ -183,7 +207,7 @@ public:
   }
 
 private:
-  /// @brief The underlying 'std::vector' that stores the elements.
+  // @brief The underlying 'std::vector' that stores the elements.
   std::vector<T> vector_;
 
   /**
