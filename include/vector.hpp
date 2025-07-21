@@ -83,12 +83,19 @@ public:
   }
 
   /**
-   * @brief Accesses an element at a specific index.
+   * @brief Accesses an element at a specific index (HANDLE MODIFICATION).
    * @param i The zero-based index of the element.
    * @return The value of the element at index 'i'.
    */
   T &operator[](const size_t &i) { return vector_[i]; }
 
+  /**
+   * @brief Accesses an element at a specific index (HANDLE READ ONLY).
+   * @param i The zero-based index of the element.
+   * @return The value of the element at index 'i'.
+   */
+  const T &operator[](const size_t &i) const { return vector_[i]; }
+ 
   /**
    * @brief Performs element-wise vector addition.
    * @param other The vector to add to this vector.
