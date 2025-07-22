@@ -2,11 +2,11 @@
 
 #include <cstddef>
 #include <cstdlib>
+#include <initializer_list>
 #include <iostream>
 #include <ostream>
 #include <utility>
 #include <vector>
-#include <initializer_list>
 
 /**
  * @file vector.hpp
@@ -26,28 +26,30 @@ namespace linalg {
  * @details This class acts as a wrapper around 'std::vector' to provide
  * a convenient interface for element-wise arithmetic, scalar operations,
  * and other common vector manipulations.
- * @tparam T The numeric type of the vector's elements. recommends ('float', 'double').
+ * @tparam T The numeric type of the vector's elements. recommends ('float',
+ * 'double').
  */
 template <typename T> class Vector {
 public:
-/**
- * @brief Constructs a Vector object to handle initialization basic.
- * @example Vector<int> v;
- */
+  /**
+   * @brief Constructs a Vector object to handle initialization basic.
+   * @example Vector<int> v;
+   */
   Vector() {}
 
   /**
    * @brief Constructsa Vector obkect to handle initialization 'std::vector'.
    * @example Vector<int> v = std::vector<int>{1,2,3};
    */
-  Vector(const std::vector<T> &X) : vector_(X) {}
+  Vector(const std::vector<T> &X) : vector_(X), col_(X.size()) {}
 
   /**
-   * @brief Constructs a Vector object to handle initialization with assignment (=).
+   * @brief Constructs a Vector object to handle initialization with assignment
+   * (=).
    * @param X An 'std::initializer_list' used to initialize the internal data.
    * @example Vector<int> v = {1, 2, 3};
    */
-  Vector(const std::initializer_list<T> &X) : vector_(X) {}
+  Vector(const std::initializer_list<T> &X) : vector_(X), col_(X.size()) {}
 
   /**
    * @brief Constructs a Vector object to handle initialization size.
@@ -55,7 +57,8 @@ public:
    * @param size An 'size_t' used reserve a vector.
    * @example Vector<int> v(5);
    */
-  Vector(const size_t &size) : vector_(size, T{}) {}
+  Vector(const size_t &size, const T val = T{})
+      : vector_(size, val), col_(size) {}
 
   /**
    * @brief Overloads the stream insertion operator '<<' for formatted output.
@@ -95,13 +98,21 @@ public:
    * @return The value of the element at index 'i'.
    */
   const T &operator[](const size_t &i) const { return vector_[i]; }
- 
+
   /**
    * @brief Performs element-wise vector addition.
    * @param other The vector to add to this vector.
    * @return A new 'Vector' object containing the sum.
    * @note The program will terminate if the vectors have different sizes.
    */
+
+  void push_back(T element) {
+    vector_.push_back(element);
+    col_ += 1;
+  }
+
+  void reserve(size_t size) { vector_.reserve(size); }
+
   Vector operator+(const Vector<T> &other) const {
     checkSize_(other);
 
@@ -148,7 +159,8 @@ public:
    * @brief Performs hadamard product.
    * @param other The vector to perfoms hadamard product from this vector.
    * @return A new 'Vector' object containing the hadamard product result.
-   * @note The program will multiply v1_i * v2_i and store value to new 'Vector'.
+   * @note The program will multiply v1_i * v2_i and store value to new
+   * 'Vector'.
    */
   Vector operator*(const Vector<T> &other) const {
     checkSize_(other);
@@ -202,9 +214,9 @@ public:
 
     // Handle division by zero case
     if (total == T{}) {
-        return Vector(std::vector<T>(vector_.size(), T{}));
+      return Vector(std::vector<T>(vector_.size(), T{}));
     }
-    
+
     for (const auto &x : vector_) {
       prop_vector.push_back(x / total);
     }
@@ -215,13 +227,13 @@ public:
    * @brief Returns the shape of the vector, represented as (1, N).
    * @return A 'std::pair<size_t, size_t>' of the form (1, number_of_elements).
    */
-  std::pair<size_t, size_t> shape() const {
-    return std::make_pair(1, vector_.size());
-  }
+  std::pair<size_t, size_t> shape() const { return std::make_pair(ROW_, col_); }
 
 private:
   // @brief The underlying 'std::vector' that stores the elements.
   std::vector<T> vector_;
+  const size_t ROW_ = 1;
+  size_t col_;
 
   /**
    * @brief Helper function to verify that two vectors have the same size.
@@ -231,7 +243,8 @@ private:
   void checkSize_(const Vector<T> &other) const {
     if (vector_.size() != other.vector_.size()) {
       std::cerr << "FATAL ERROR: Vector sizes do not match for operation."
-                << " Left: " << vector_.size() << ", Right: " << other.vector_.size() << std::endl;
+                << " Left: " << vector_.size()
+                << ", Right: " << other.vector_.size() << std::endl;
       std::exit(EXIT_FAILURE);
     }
   }
@@ -239,3 +252,15 @@ private:
 
 } // namespace linalg
 } // namespace kar
+
+/**
+ * @brief Overloads the stream insertion operator '<<' for formatted output.
+ * @param out The output stream (e.g., 'std::cout').
+ * @param A The pair object to print.
+ * @return A reference to the output stream.
+ */
+inline std::ostream &operator<<(std::ostream &out,
+                                const std::pair<size_t, size_t> &shape) {
+  out << "Row: " << shape.first << "\tCol: " << shape.second << std::endl;
+  return out;
+}
