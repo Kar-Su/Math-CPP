@@ -1,0 +1,15 @@
+1. Linear Algebra
+  A. class vector:
+    - x ∈ vector
+    - using v = vector
+    a. vector func:
+      func sum v 👍
+      func subs v 👍
+      func mul v 👍
+      func div v 👍
+    b. x func
+      func sum x
+      func avg x
+
+  B. class matrix:
+  C. class tensor:
