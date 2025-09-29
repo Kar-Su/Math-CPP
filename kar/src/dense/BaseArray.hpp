@@ -1,16 +1,45 @@
-#ifndef BASE_ARRAY_HPP
-#define BASE_ARRAY_HPP
+#ifndef BASEARRAY_HPP
+#define BASEARRAY_HPP
 
 #include <array>
-#include <utility>
+#include <cstddef>
 
 namespace kar {
-namespace nd {
+namespace container {
 
-template <typename... VALUE_T> constexpr auto arr(VALUE_T &&...VALUE) {
-  return std::array{std::forward<VALUE_T>(VALUE)...};
-}
-} // namespace nd
+template <typename TYPE, std::size_t... DIMS_SEQ> class Array {
+  static constexpr std::size_t rank = sizeof...(DIMS_SEQ);
+  static constexpr std::size_t size = (std::size_t(1) * ... * DIMS_SEQ);
+
+  static constexpr std::array<TYPE, rank> shape{DIMS_SEQ...};
+  static constexpr std::array<TYPE, rank> stride_element = []() {
+    std::array<TYPE, rank> s{};
+    if constexpr (rank == 0) {
+      return s;
+    }
+    s[rank - 1] = 1;
+    for (std::size_t i = rank - 1; i-- > 0;) {
+      s[i] = s[i + 1] * shape[i + 1];
+    }
+    return s;
+  };
+
+  static constexpr std::array<TYPE, rank> stride_byte = []() {
+    std::size_t byte = sizeof(TYPE);
+    std::array<TYPE, rank> s{};
+    if constexpr (rank == 0) {
+      return s;
+    }
+
+    s[rank - 1] = byte;
+    for (std::size_t i = rank - 1; i-- < rank;) {
+      s[i] = shape[i - 1] * s[i - 1];
+    }
+    return s;
+  };
+};
+
+} // namespace container
 } // namespace kar
 
-#endif // BASE_ARRAY_HPP
+#endif // !BASEARRAY_HPP
