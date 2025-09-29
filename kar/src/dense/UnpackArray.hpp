@@ -1,5 +1,5 @@
-#ifndef WRAPPER_ARRAY_HPP
-#define WRAPPER_ARRAY_HPP
+#ifndef UNPACKARRAY_HPP
+#define UNPACKARRAY_HPP
 
 #include <array>
 #include <cstddef>
@@ -7,7 +7,6 @@
 
 namespace kar {
 namespace internal {
-
 // Get base value type
 template <typename BASE_T> struct base_value {
   using type = BASE_T;
@@ -43,4 +42,4 @@ using dims_seq = typename dimension_sequence<BASE_DIMS>::type;
 } // namespace internal
 } // namespace kar
 
-#endif // !WRAPPER_ARRAY_HPP
+#endif // !UNPACKARRAY_HPP
