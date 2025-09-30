@@ -10,11 +10,22 @@ namespace container {
 
 template <typename TYPE, std::size_t... DIMS_SEQ> class Array {
 public:
+  [[nodiscard]] static constexpr std::size_t Rank() noexcept { return rank; }
+
+  [[nodiscard]] static constexpr std::size_t Size() noexcept { return size; }
+
+  static constexpr auto Shape() noexcept { return shape; }
+
+  static constexpr auto StrideElement() noexcept { return stride_element; }
+
+  static constexpr auto StrideByte() noexcept { return stride_byte; }
+
+private:
   static constexpr std::size_t rank = sizeof...(DIMS_SEQ);
   static constexpr std::size_t size = (std::size_t(1) * ... * DIMS_SEQ);
 
   static constexpr std::array<TYPE, rank> shape{DIMS_SEQ...};
-  static constexpr std::array<TYPE, rank> stride_element = []() {
+  static constexpr std::array<TYPE, rank> stride_element = []() noexcept {
     std::array<TYPE, rank> s{};
     if constexpr (rank == 0)
       return s;
@@ -26,7 +37,9 @@ public:
     return s;
   };
 
-  static constexpr std::array<TYPE, rank> stride_byte = []() {
+  std::array<TYPE, size> data;
+
+  static constexpr std::array<TYPE, rank> stride_byte = []() noexcept {
     std::size_t byte = sizeof(TYPE);
     std::array<TYPE, rank> s{};
     if constexpr (rank == 0)
@@ -39,11 +52,8 @@ public:
     return s;
   };
 
-private:
-  std::array<TYPE, size> data;
-
   static constexpr std::size_t
-  lexicographic(std::array<std::size_t, rank> idx) {
+  Lexicographic(std::array<std::size_t, rank> idx) noexcept {
     if constexpr (rank == 0)
       return 0;
 
