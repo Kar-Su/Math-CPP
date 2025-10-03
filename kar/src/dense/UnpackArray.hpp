@@ -35,7 +35,6 @@ struct dimension_sequence<std::array<RECURSIVE_DIMS, N>> {
       std::index_sequence<N>,
       typename dimension_sequence<RECURSIVE_DIMS>::type>::type;
 };
-
 template <typename BASE_DIMS>
 using dims_seq = typename dimension_sequence<BASE_DIMS>::type;
 
