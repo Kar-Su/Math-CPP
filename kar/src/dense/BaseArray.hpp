@@ -25,6 +25,7 @@ public:
 
   template <typename... SEQ>
   [[nodiscard]] constexpr auto &operator()(const SEQ &...idx) noexcept {
+    _checkRank(idx...);
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
@@ -32,18 +33,21 @@ public:
   template <typename... SEQ>
   [[nodiscard]] constexpr const auto &
   operator()(const SEQ &...idx) const noexcept {
+    _checkRank(idx...);
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
 
   template <typename... SEQ>
-  [[nodiscard]] constexpr auto at(SEQ *...idx) noexcept {
+  [[nodiscard]] constexpr auto at(SEQ &...idx) noexcept {
+    _checkBound(std::array<std::size_t, _rank>{idx...});
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
 
   template <typename... SEQ>
-  [[nodiscard]] constexpr const auto at(SEQ *...idx) const noexcept {
+  [[nodiscard]] constexpr const auto at(SEQ &...idx) const noexcept {
+    _checkBound(std::array<std::size_t, _rank>{idx...});
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
@@ -79,6 +83,11 @@ protected:
 
     return x_s;
   };
+
+  template <typename... SIZE_SEQ>
+  static constexpr void _checkRank(const SIZE_SEQ &...S) noexcept {
+    static_assert(sizeof...(S) != rank, "Param doesn't same with rank!");
+  }
 
   static constexpr void
   _checkBound(const std::array<std::size_t, _rank> &idx) noexcept {
