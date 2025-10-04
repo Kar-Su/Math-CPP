@@ -24,24 +24,26 @@ public:
   }
 
   template <typename... SEQ>
-  constexpr auto &operator()(const SEQ &...idx) noexcept {
+  [[nodiscard]] constexpr auto &operator()(const SEQ &...idx) noexcept {
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
 
   template <typename... SEQ>
-  constexpr const auto &operator()(const SEQ &...idx) const noexcept {
-    return _data[_lexicographic(
-        std::array<std::size_t, _rank>{std::size_t(idx...)})];
-  }
-
-  template <typename... SEQ> constexpr auto at(SEQ *...idx) noexcept {
+  [[nodiscard]] constexpr const auto &
+  operator()(const SEQ &...idx) const noexcept {
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
 
   template <typename... SEQ>
-  constexpr const auto at(SEQ *...idx) const noexcept {
+  [[nodiscard]] constexpr auto at(SEQ *...idx) noexcept {
+    return _data[_lexicographic(
+        std::array<std::size_t, _rank>{std::size_t(idx...)})];
+  }
+
+  template <typename... SEQ>
+  [[nodiscard]] constexpr const auto at(SEQ *...idx) const noexcept {
     return _data[_lexicographic(
         std::array<std::size_t, _rank>{std::size_t(idx...)})];
   }
