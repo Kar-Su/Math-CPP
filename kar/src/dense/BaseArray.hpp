@@ -1,6 +1,7 @@
 #ifndef BASEARRAY_HPP
 #define BASEARRAY_HPP
 
+#include "UnpackArray.hpp"
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -27,7 +28,7 @@ public:
   [[nodiscard]] constexpr auto &operator()(const SEQ &...idx) noexcept {
     _checkRank(idx...);
     return _data[_lexicographic(
-        std::array<std::size_t, _rank>{std::size_t(idx...)})];
+        std::array<std::size_t, _rank>{static_cast<std::size_t>(idx)...})];
   }
 
   template <typename... SEQ>
@@ -35,58 +36,66 @@ public:
   operator()(const SEQ &...idx) const noexcept {
     _checkRank(idx...);
     return _data[_lexicographic(
-        std::array<std::size_t, _rank>{std::size_t(idx...)})];
+        std::array<std::size_t, _rank>{static_cast<std::size_t>(idx)...})];
   }
 
   template <typename... SEQ>
-  [[nodiscard]] constexpr auto at(SEQ &...idx) noexcept {
-    _checkBound(std::array<std::size_t, _rank>{idx...});
-    return _data[_lexicographic(
-        std::array<std::size_t, _rank>{std::size_t(idx...)})];
+  [[nodiscard]] constexpr auto &at(const SEQ &...idx) noexcept {
+    _checkBound(
+        std::array<std::size_t, _rank>{static_cast<std::size_t>(idx)...});
+    return operator()(idx...);
   }
 
   template <typename... SEQ>
-  [[nodiscard]] constexpr const auto at(SEQ &...idx) const noexcept {
-    _checkBound(std::array<std::size_t, _rank>{idx...});
-    return _data[_lexicographic(
-        std::array<std::size_t, _rank>{std::size_t(idx...)})];
+  [[nodiscard]] constexpr const auto &at(const SEQ &...idx) const noexcept {
+    _checkBound(
+        std::array<std::size_t, _rank>{static_cast<std::size_t>(idx)...});
+    return operator()(idx...);
+  }
+
+  template <typename ARRAY> explicit constexpr array(const ARRAY &arr) {
+    // using seq = typename kar::internal::dims_seq<ARRAY>;
+    auto it = _data.begin();
+    flatten(it, arr);
   }
 
 protected:
-  static constexpr std::size_t _rank = sizeof...(DIMS_SEQ);
+  inline static constexpr std::size_t _rank = sizeof...(DIMS_SEQ);
   static constexpr std::size_t _size = (std::size_t(1) * ... * DIMS_SEQ);
 
   std::array<TYPE, _size> _data;
 
-  static constexpr std::array<TYPE, _rank> _shape{DIMS_SEQ...};
-  static constexpr std::array<TYPE, _rank> _stride_element = []() noexcept {
-    std::array<TYPE, _rank> x_s{};
-    if constexpr (_rank == 0)
-      return x_s;
+  inline static constexpr std::array<std::size_t, _rank> _shape{DIMS_SEQ...};
+  inline static constexpr std::array<std::size_t, _rank> _stride_element =
+      []() noexcept {
+        std::array<std::size_t, _rank> x_s{};
+        if constexpr (_rank == 0)
+          return x_s;
 
-    x_s[_rank - 1] = 1;
-    for (std::size_t i = _rank - 1; i-- > 0;)
-      x_s[i] = x_s[i + 1] * _shape[i + 1];
+        x_s[_rank - 1] = 1;
+        for (std::size_t i = _rank - 1; i-- > 0;)
+          x_s[i] = x_s[i + 1] * _shape[i + 1];
 
-    return x_s;
-  };
+        return x_s;
+      }();
 
-  static constexpr std::array<TYPE, _rank> _stride_byte = []() noexcept {
-    std::size_t byte = sizeof(TYPE);
-    std::array<TYPE, _rank> x_s;
-    if constexpr (_rank == 0)
-      return x_s;
+  inline static constexpr std::array<std::size_t, _rank> _stride_byte =
+      []() noexcept {
+        std::size_t x_byte = sizeof(TYPE);
+        std::array<std::size_t, _rank> x_s;
+        if constexpr (_rank == 0)
+          return x_s;
 
-    x_s[_rank - 1] = byte;
-    for (std::size_t i = _rank - 1; i-- < _rank;)
-      x_s[i] = _shape[i - 1] * x_s[i - 1];
+        x_s[_rank - 1] = x_byte;
+        for (std::size_t i = _rank - 1; i-- < _rank;)
+          x_s[i] = _shape[i - 1] * x_s[i - 1];
 
-    return x_s;
-  };
+        return x_s;
+      }();
 
   template <typename... SIZE_SEQ>
   static constexpr void _checkRank(const SIZE_SEQ &...S) noexcept {
-    static_assert(sizeof...(S) != rank, "Param doesn't same with rank!");
+    static_assert(sizeof...(S) == _rank, "Param doesn't same with rank!");
   }
 
   static constexpr void
@@ -109,6 +118,18 @@ protected:
       x_offside += idx[i] * _stride_element[i];
 
     return x_offside;
+  }
+
+  template <typename ITER, typename DATA>
+  static constexpr void flatten(ITER &it, const DATA &x) {
+    *it++ = static_cast<TYPE>(x);
+  }
+
+  template <typename ITER, typename DATA, std::size_t N>
+  static constexpr void flatten(ITER &it, const std::array<DATA, N> arr) {
+    for (auto const &data : arr) {
+      flatten(it, data);
+    }
   }
 };
 
