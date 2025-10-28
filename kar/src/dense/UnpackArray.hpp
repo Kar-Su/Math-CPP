@@ -6,6 +6,9 @@
 #include <utility>
 
 namespace kar {
+namespace container {
+template <typename TYPE, std::size_t... DIMS_SEQ> class array;
+} // namespace container
 namespace internal {
 // Get base value type
 template <typename BASE_T> struct base_value {
@@ -13,6 +16,9 @@ template <typename BASE_T> struct base_value {
 };
 template <typename FORWARD_T, std::size_t N>
 struct base_value<std::array<FORWARD_T, N>> : base_value<FORWARD_T> {};
+template <typename FORWARD_T, std::size_t... DIMS_SEQ>
+struct base_value<kar::container::array<FORWARD_T, DIMS_SEQ...>>
+    : base_value<FORWARD_T> {};
 template <typename BASE_T>
 using base_value_t = typename base_value<BASE_T>::type;
 
@@ -34,6 +40,10 @@ struct dimension_sequence<std::array<RECURSIVE_DIMS, N>> {
   using type = typename sequence_concate<
       std::index_sequence<N>,
       typename dimension_sequence<RECURSIVE_DIMS>::type>::type;
+};
+template <typename RECURSIVE_DIMS, std::size_t... DIMS_SEQ>
+struct dimension_sequence<kar::container::array<RECURSIVE_DIMS, DIMS_SEQ...>> {
+  using type = std::index_sequence<DIMS_SEQ...>;
 };
 template <typename BASE_DIMS>
 using dims_seq = typename dimension_sequence<BASE_DIMS>::type;
