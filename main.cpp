@@ -1,15 +1,11 @@
-#include "kar/src/dense/BaseArray.hpp"
 #include "kar/src/dense/Array.hpp"
 #include <iostream>
-#include <type_traits>
-#include <utility>
 
 using namespace kar;
 
 int main() {
   auto line = nd::array<float>({1.0f, 2.2f, 3.2f, 4.4f});
-  auto nest = nd::array<float>({{1.0f, 2.2f, 3.2f},
-                                {4.1f, 5.1f, 6.4f}});
+  auto nest = nd::array<float>({{1.0f, 2.2f, 3.2f}, {4.1f, 5.1f, 6.4f}});
   std::cout << typeid(nest).name() << std::endl;
 
   using leaf = internal::base_value_t<decltype(nest)>;
@@ -22,5 +18,6 @@ int main() {
   auto test = nd::array<int>({{1, 2, 3}, {4, 5, 6}});
   static_cast<void>(test);
   static_cast<void>(line);
+  auto many = nd::array<int>({{{{{{1}}}}}});
   return 0;
 }
