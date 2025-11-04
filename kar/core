@@ -1,0 +1,9 @@
+#if defined(VECTOR_CUSTOM)
+#include <cstddef>
+#include <cstdlib>
+#include <initializer_list>
+#include <iostream>
+#include <ostream>
+#include <utility>
+#include <vector>
+#endif //!CORE VECTOR

@@ -19,5 +19,6 @@ int main() {
   static_cast<void>(test);
   static_cast<void>(line);
   auto many = nd::array<int>({{{{{{1}}}}}});
+  static_cast<void>(many);
   return 0;
 }
